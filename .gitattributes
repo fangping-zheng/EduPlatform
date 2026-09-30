@@ -1,0 +1,31 @@
+# 统一换行符，保证跨平台 clone 之后脚本仍能直接运行
+#
+# 为什么要这个文件：
+# 1. core.autocrlf=true 时，Windows 上检出的 .sh 会变成 CRLF 换行；
+#    而 deploy/install-server.sh 要上传到 Linux 用 bash 执行，
+#    行尾多出的 \r 会让 bash 报错（如 `set -euo pipefail\r: command not found`）。
+# 2. 反过来，Windows 上的 .cmd 必须是 CRLF 才能稳定工作。
+#
+# 规则：仓库里统一存 LF，检出时按平台给正确的换行符。
+
+* text=auto
+
+# Linux / macOS 上执行的脚本：任何平台检出都必须是 LF
+*.sh    text eol=lf
+*.bash  text eol=lf
+
+# Windows 批处理：必须 CRLF
+*.cmd   text eol=crlf
+*.bat   text eol=crlf
+
+# PowerShell 脚本：CRLF 最稳（且带 BOM 才不会在 PowerShell 5.1 下中文乱码）
+*.ps1   text eol=crlf
+
+# 二进制文件不要做任何转换
+*.jar   binary
+*.db    binary
+*.mv.db binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.woff2 binary
