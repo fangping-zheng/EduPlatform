@@ -1,0 +1,57 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: edu-platform
+
+  # ===== 默认（dev/demo）数据源：H2 文件库，MySQL 兼容模式 =====
+  # 克隆项目后无需安装任何数据库即可直接运行；生产切换到 mysql profile。
+  datasource:
+    url: jdbc:h2:file:./data/edu_platform;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        # 用 StatementInspector 统计真实 SQL 条数 —— N+1 优化的量化依据
+        session_factory:
+          statement_inspector: edu.platform.config.SqlCountInspector
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+logging:
+  level:
+    root: INFO
+    edu.platform: INFO
+    org.hibernate.SQL: WARN
+
+app:
+  jwt:
+    # 生产环境务必通过环境变量覆盖：JWT_SECRET
+    secret: ${JWT_SECRET:edu-platform-demo-secret-key-change-me-in-production-0123456789}
+    expire-minutes: 720
+
+agent:
+  # 留空则进入 fallback 模式：不调用大模型，但仍会真实调用后端业务工具。
+  # 生产/演示请通过环境变量注入，切勿提交到仓库。
+  api-key: ${AGENT_API_KEY:}
+  base-url: ${AGENT_BASE_URL:https://api.deepseek.com/v1}
+  model: ${AGENT_MODEL:deepseek-chat}
+  timeout-seconds: ${AGENT_TIMEOUT_SECONDS:30}
+  max-tool-rounds: 4
+  max-tool-result-chars: 2000
