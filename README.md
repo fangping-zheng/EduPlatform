@@ -3,7 +3,7 @@
 > 一个**能真正跑起来、能点开就验证**的教务平台：真实后端、真实数据库、真实权限校验，
 > 并且内置一个**只能用受控只读工具读取真实业务数据**的 AI 智能体。
 
-[![CI](https://github.com/REPLACE_ME/edu-platform/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![CI](https://github.com/fangping-zheng/EduPlatform/actions/workflows/ci.yml/badge.svg)](https://github.com/fangping-zheng/EduPlatform/actions/workflows/ci.yml)
 
 **在线演示**：`【部署后把链接填这里】` ｜ **演示账号见下方，免注册即可体验**
 
