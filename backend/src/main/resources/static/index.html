@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高校教务与学情分析平台</title>
+<style>
+/* ===== Reset & Base ===== */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#eef2f7;color:#2c3e50;font-size:14px;}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+
+/* ===== Login Page ===== */
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:24px;}
+.login-card{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:32px 36px;width:520px;max-width:94vw;max-height:94vh;overflow-y:auto;}
+.login-card h1{text-align:center;font-size:23px;color:#333;margin-bottom:8px;}
+.login-card .subtitle{text-align:center;color:#888;font-size:13px;margin-bottom:24px;line-height:1.6;}
+.login-card .subtitle b{color:#4a90d9;}
+.login-form .form-group{margin-bottom:16px;}
+.login-form label{display:block;font-size:13px;color:#555;margin-bottom:6px;font-weight:500;}
+.login-form input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;transition:border-color .2s;}
+.login-form input:focus{outline:none;border-color:#4a90d9;}
+.login-form .btn-login{width:100%;padding:12px;background:linear-gradient(135deg,#4a90d9,#357abd);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s;}
+.login-form .btn-login:hover{opacity:.9;}
+.login-form .btn-login:disabled{opacity:.6;cursor:not-allowed;}
+
+/* ===== Top Navigation ===== */
+#app{display:none;min-height:100vh;}
+.top-nav{position:fixed;top:0;left:0;right:0;height:56px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;padding:0 24px;z-index:100;}
+.top-nav .logo{font-size:18px;font-weight:700;color:#357abd;white-space:nowrap;}
+.top-nav .nav-tabs{display:flex;gap:4px;margin-left:32px;}
+.top-nav .nav-tab{padding:8px 18px;border-radius:8px;cursor:pointer;font-size:14px;color:#666;transition:all .2s;white-space:nowrap;}
+.top-nav .nav-tab:hover{background:#eef4fb;color:#357abd;}
+.top-nav .nav-tab.active{background:#357abd;color:#fff;}
+.top-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+.top-nav .user-info{font-size:13px;color:#666;}
+.top-nav .user-info b{color:#357abd;}
+.top-nav .btn-logout{padding:6px 16px;border:1.5px solid #ddd;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;color:#666;transition:all .2s;}
+.top-nav .btn-logout:hover{border-color:#e74c3c;color:#e74c3c;}
+
+/* ===== Main Content ===== */
+.main-content{margin-top:56px;padding:24px;}
+
+/* ===== Section Header ===== */
+.section-header{display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;}
+.section-header h2{font-size:20px;color:#2c3e50;}
+.section-header .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto;}
+
+/* ===== Buttons ===== */
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;display:inline-flex;align-items:center;gap:4px;}
+.btn-primary{background:#357abd;color:#fff;}
+.btn-primary:hover{background:#2c6ba8;}
+.btn-success{background:#27ae60;color:#fff;}
+.btn-success:hover{background:#229954;}
+.btn-danger{background:#e74c3c;color:#fff;}
+.btn-danger:hover{background:#c0392b;}
+.btn-warning{background:#f39c12;color:#fff;}
+.btn-warning:hover{background:#d68910;}
+.btn-default{background:#fff;color:#555;border:1.5px solid #ddd;}
+.btn-default:hover{background:#f5f5f5;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ===== Filter Bar ===== */
+.filter-bar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.filter-bar select,.filter-bar input{padding:7px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;}
+
+/* ===== Tables ===== */
+.table-wrapper{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow:hidden;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:#f8f9fa;padding:12px 16px;text-align:left;font-size:13px;color:#555;font-weight:600;border-bottom:2px solid #e8e8e8;white-space:nowrap;}
+tbody td{padding:11px 16px;border-bottom:1px solid #f0f0f0;font-size:13px;}
+tbody tr:hover{background:#f8fbff;}
+tbody tr:last-child td{border-bottom:none;}
+.table-empty{text-align:center;padding:40px;color:#aaa;}
+
+/* ===== Modal ===== */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:520px;max-width:90vw;max-height:85vh;display:flex;flex-direction:column;}
+.modal.large{width:900px;}
+.modal-header{padding:18px 24px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;}
+.modal-header h3{font-size:17px;color:#333;}
+.modal-close{font-size:22px;cursor:pointer;color:#aaa;line-height:1;}
+.modal-close:hover{color:#333;}
+.modal-body{padding:24px;overflow-y:auto;flex:1;}
+.modal-footer{padding:16px 24px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:10px;}
+
+/* ===== Forms ===== */
+.form-row{display:flex;gap:16px;margin-bottom:16px;}
+.form-row.full{display:block;}
+.form-group{flex:1;}
+.form-group label{display:block;font-size:13px;color:#555;margin-bottom:6px;font-weight:500;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#4a90d9;}
+.form-group textarea{resize:vertical;min-height:80px;}
+
+/* ===== Split Panel ===== */
+.split-panel{display:flex;gap:16px;}
+.split-panel .left{flex:1;min-width:0;}
+.split-panel .right{flex:1;min-width:0;}
+@media(max-width:768px){.split-panel{flex-direction:column;}}
+
+/* ===== Knowledge Tree ===== */
+.knowledge-tree{background:#f9fafb;border-radius:8px;padding:16px;}
+.knowledge-tree ul{padding-left:20px;}
+.knowledge-tree > ul{padding-left:0;}
+.knowledge-tree li{position:relative;padding:6px 0 6px 8px;}
+.knowledge-tree li::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:#ccc;}
+.knowledge-tree li::after{content:'';position:absolute;left:0;top:14px;width:14px;height:1px;background:#ccc;}
+.knowledge-tree > ul > li::before,.knowledge-tree > ul > li::after{display:none;}
+.knowledge-tree .node-name{font-weight:500;cursor:pointer;padding:4px 8px;border-radius:4px;display:inline-block;}
+.knowledge-tree .node-name:hover{background:#e8f0fe;}
+.knowledge-tree .node-content{font-size:12px;color:#888;display:block;margin-top:2px;padding-left:8px;}
+
+/* ===== Toast ===== */
+#toast{position:fixed;top:70px;right:24px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast-msg{padding:12px 24px;border-radius:8px;color:#fff;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:slideIn .3s ease;max-width:420px;}
+.toast-msg.success{background:#27ae60;}
+.toast-msg.error{background:#e74c3c;}
+.toast-msg.info{background:#357abd;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+/* ===== Cards ===== */
+.info-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:16px;}
+.info-card h3{font-size:15px;color:#333;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:8px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:20px;}
+.stat-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);text-align:center;}
+.stat-card .stat-num{font-size:28px;font-weight:700;color:#357abd;}
+.stat-card .stat-label{font-size:13px;color:#888;margin-top:4px;}
+
+/* ===== Badge ===== */
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;}
+.badge-student{background:#e3f2fd;color:#1976d2;}
+.badge-teacher{background:#fff3e0;color:#e65100;}
+.badge-admin{background:#f3e5f5;color:#7b1fa2;}
+.badge-success{background:#e8f5e9;color:#2e7d32;}
+.badge-danger{background:#ffebee;color:#c62828;}
+.badge-warning{background:#fff8e1;color:#f57f17;}
+.badge-default{background:#f5f5f5;color:#666;}
+
+/* ===== Tabs ===== */
+.sub-tabs{display:flex;gap:0;border-bottom:2px solid #eee;margin-bottom:16px;}
+.sub-tab{padding:10px 20px;cursor:pointer;font-size:14px;color:#666;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.sub-tab:hover{color:#357abd;}
+.sub-tab.active{color:#357abd;border-bottom-color:#357abd;font-weight:600;}
+
+/* ===== Student Management Split ===== */
+.mgmt-split{display:flex;gap:16px;}
+.mgmt-split .col{flex:1;min-width:0;}
+.mgmt-split h3{text-align:center;font-size:15px;margin-bottom:12px;padding:10px;border-radius:8px;}
+.mgmt-split .col-enrolled h3{background:#e8f5e9;color:#2e7d32;}
+.mgmt-split .col-unenrolled h3{background:#fff3e0;color:#e65100;}
+@media(max-width:768px){.mgmt-split{flex-direction:column;}}
+
+/* ===== Misc ===== */
+.text-muted{color:#aaa;}
+.text-center{text-align:center;}
+.mt-16{margin-top:16px;}
+.mt-8{margin-top:8px;}
+.mb-16{margin-bottom:16px;}
+.cursor-pointer{cursor:pointer;}
+.link-text{color:#357abd;cursor:pointer;text-decoration:underline;}
+.sub-table{width:100%;border-collapse:collapse;}
+.sub-table th{background:#f0f4f8;padding:8px 12px;text-align:left;font-size:12px;color:#555;}
+.sub-table td{padding:8px 12px;border-bottom:1px solid #eee;font-size:12px;}
+.sub-table tr:hover{background:#f8fbff;}
+.scrollable{max-height:400px;overflow-y:auto;}
+select{cursor:pointer;}
+.hint-text{font-size:12px;color:#999;line-height:1.7;}
+
+/* ===== 新增：登录页演示账号 ===== */
+.demo-accounts{margin-top:22px;border-top:1px dashed #e2e2e2;padding-top:16px;}
+.demo-accounts .demo-title{font-size:13px;font-weight:600;color:#555;margin-bottom:10px;}
+.demo-accounts .sub-table th,.demo-accounts .sub-table td{padding:7px 10px;}
+.demo-pass{font-family:ui-monospace,Consolas,monospace;color:#7b1fa2;}
+
+/* ===== 新增：加载 / 错误 ===== */
+.loading-box{padding:32px;text-align:center;color:#888;font-size:13px;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #cfd8e3;border-top-color:#357abd;border-radius:50%;vertical-align:-2px;margin-right:8px;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-box{background:#fff5f5;border:1px solid #ffd5d5;color:#c0392b;border-radius:10px;padding:16px 18px;font-size:13px;line-height:1.7;}
+
+/* ===== 新增：AI 学习助手 ===== */
+.nav-tab.highlight{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:600;}
+.nav-tab.highlight:hover{background:linear-gradient(135deg,#5a72dd,#6a3f96);color:#fff;}
+.nav-tab.highlight.active{background:linear-gradient(135deg,#4a63d8,#5d3389);color:#fff;box-shadow:0 3px 10px rgba(102,126,234,.45);}
+.session-chip{font-size:12px;color:#888;font-family:ui-monospace,Consolas,monospace;background:#f5f7fa;border-radius:8px;padding:5px 10px;}
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 165px);min-height:460px;}
+.chat-messages{flex:1;overflow-y:auto;background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.msg{display:flex;margin-bottom:16px;}
+.msg.user{justify-content:flex-end;}
+.bubble{max-width:80%;padding:11px 15px;border-radius:12px;font-size:13.5px;line-height:1.75;word-break:break-word;}
+.msg.user .bubble{background:#357abd;color:#fff;border-bottom-right-radius:2px;white-space:pre-wrap;}
+.msg.assistant .bubble{background:#f2f5f9;color:#2c3e50;border-bottom-left-radius:2px;}
+.bubble .msg-text{white-space:pre-wrap;}
+.quick-questions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+.quick-q{padding:6px 13px;border:1px solid #cfe0f2;background:#f4f9ff;color:#357abd;border-radius:16px;font-size:12.5px;cursor:pointer;transition:all .2s;}
+.quick-q:hover{background:#e3f0fd;}
+.chat-input{display:flex;gap:10px;align-items:flex-end;}
+.chat-input textarea{flex:1;padding:11px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;min-height:52px;}
+.chat-input textarea:focus{outline:none;border-color:#4a90d9;}
+.chat-input .btn{padding:12px 26px;font-size:14px;}
+details.tool-calls{margin-top:10px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:12.5px;}
+details.tool-calls summary{cursor:pointer;color:#357abd;font-weight:600;outline:none;font-size:12.5px;}
+.tool-call{border-top:1px dashed #e5eaf0;padding:9px 0 4px;margin-top:8px;}
+.tool-call:first-of-type{border-top:none;}
+.tc-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.tool-name{font-family:ui-monospace,Consolas,monospace;color:#7b1fa2;font-weight:700;}
+.tc-meta{color:#999;font-size:11.5px;}
+.tc-args,.tc-result{font-family:ui-monospace,Consolas,monospace;background:#f7f9fc;padding:7px 9px;border-radius:6px;margin-top:6px;white-space:pre-wrap;word-break:break-all;color:#4a5568;font-size:11.5px;line-height:1.6;}
+.usage-bar{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding-top:8px;border-top:1px solid #e4e9f0;font-size:12px;color:#8a93a0;}
+.mode-chip{font-weight:700;border-radius:10px;padding:2px 9px;font-size:11.5px;}
+.mode-llm{background:#e8f5e9;color:#2e7d32;}
+.mode-fallback{background:#fff8e1;color:#f57f17;}
+.mode-unknown{background:#f5f5f5;color:#777;}
+
+/* ===== 新增：性能基准 ===== */
+.bench-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+.bench-card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.bench-card.naive{border-top:4px solid #e74c3c;}
+.bench-card.optimized{border-top:4px solid #27ae60;}
+.bench-card.select{border-top:4px solid #f39c12;}
+.bench-card h3{font-size:15px;color:#333;margin-bottom:12px;}
+.metric{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #eee;font-size:13px;}
+.metric:last-child{border-bottom:none;}
+.metric .val{font-weight:700;color:#2c3e50;font-family:ui-monospace,Consolas,monospace;}
+.big-num{font-size:30px;font-weight:800;line-height:1.2;text-align:center;}
+.big-sub{text-align:center;font-size:12px;color:#888;margin-top:4px;}
+.bench-note{font-size:12px;color:#999;margin-top:10px;line-height:1.7;}
+.progress{background:#eef2f7;border-radius:8px;height:8px;overflow:hidden;min-width:90px;}
+.progress > i{display:block;height:100%;background:linear-gradient(90deg,#4a90d9,#27ae60);}
+</style>
+</head>
+<body>
+
+<!-- ===== Login Page ===== -->
+<div id="loginPage">
+  <div class="login-card">
+    <h1>🎓 高校教务与学情分析平台</h1>
+    <p class="subtitle">
+      高校教务与学情分析平台 —— <b>真实前后端分离演示</b><br>
+      所有数据均来自 <b>REST API（/api/*）</b>，无任何前端假数据
+    </p>
+    <div class="login-form">
+      <div class="form-group">
+        <label>用户名</label>
+        <input type="text" id="loginUsername" placeholder="请输入用户名" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+      </div>
+      <button class="btn-login" id="loginBtn" onclick="Auth.login()">登 录</button>
+    </div>
+
+    <!-- 演示账号（与 docs/API.md 种子数据一致），支持一键填充 -->
+    <div class="demo-accounts">
+      <div class="demo-title">📋 演示账号（点击「填充」即可免注册体验）</div>
+      <table class="sub-table">
+        <thead><tr><th>角色</th><th>用户名</th><th>密码</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-admin">管理员</span></td><td>admin</td><td class="demo-pass">admin123</td>
+              <td><button class="btn btn-sm btn-default" onclick="Auth.fill('admin','admin123')">填充</button></td></tr>
+          <tr><td><span class="badge badge-teacher">教师</span></td><td>t1001</td><td class="demo-pass">123456</td>
+              <td><button class="btn btn-sm btn-default" onclick="Auth.fill('t1001','123456')">填充</button></td></tr>
+          <tr><td><span class="badge badge-teacher">教师</span></td><td>t1002</td><td class="demo-pass">123456</td>
+              <td><button class="btn btn-sm btn-default" onclick="Auth.fill('t1002','123456')">填充</button></td></tr>
+          <tr><td><span class="badge badge-student">学生</span></td><td>s2023001</td><td class="demo-pass">123456</td>
+              <td><button class="btn btn-sm btn-default" onclick="Auth.fill('s2023001','123456')">填充</button></td></tr>
+          <tr><td><span class="badge badge-student">学生</span></td><td>s2023002</td><td class="demo-pass">123456</td>
+              <td><button class="btn btn-sm btn-default" onclick="Auth.fill('s2023002','123456')">填充</button></td></tr>
+          <tr><td><span class="badge badge-student">学生</span></td><td>s2023003</td><td class="demo-pass">123456</td>
+              <td><button class="btn btn-sm btn-default" onclick="Auth.fill('s2023003','123456')">填充</button></td></tr>
+        </tbody>
+      </table>
+      <p class="hint-text mt-8">登录接口：<code>POST /api/auth/login</code>；登录后所有请求自动携带 <code>Authorization: Bearer &lt;token&gt;</code>。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== App Container ===== -->
+<div id="app">
+  <!-- Top Navigation -->
+  <div class="top-nav">
+    <span class="logo">🎓 高校教务与学情分析平台</span>
+    <div class="nav-tabs" id="navTabs"></div>
+    <div class="nav-right">
+      <span class="user-info" id="userInfo"></span>
+      <button class="btn-logout" onclick="Auth.logout()">退出</button>
+    </div>
+  </div>
+  <div class="main-content" id="mainContent"></div>
+</div>
+
+<!-- ===== Modal Container ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <span class="modal-close" onclick="UI.closeModal()">&times;</span>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- ===== Toast Container ===== -->
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+ * 高校教务与学情分析平台 —— 前端（原生 JS，无构建步骤，无外部 CDN）
+ * 数据层：全部通过 /api/** 真实请求获取（契约见 docs/API.md）
+ *   - 业务数据不落 localStorage / sessionStorage，每次进入页面重新拉取
+ *   - sessionStorage 仅保存登录 token（JWT）
+ * ===================================================================== */
+
+/* ---------------------------------------------------------------
+ * 工具函数
+ * --------------------------------------------------------------- */
+const Utils = {
+  // HTML 转义
+  escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  },
+  escape(str) { return this.escapeHtml(str); },
+
+  // 用于内联 onclick 字符串参数的转义
+  js(str) {
+    return String(str === null || str === undefined ? '' : str)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  },
+
+  // ISO-8601 -> 2026-10-08 23:59
+  fmtTime(v) {
+    if (!v) return '-';
+    return String(v).replace('T', ' ').slice(0, 16);
+  },
+
+  // 成绩展示
+  grade(v) {
+    return (v === null || v === undefined || v === '') ? '<span class="text-muted">未录入</span>' : this.escape(v);
+  },
+
+  // datetime-local 默认值（7 天后 23:59）
+  defaultDeadline() {
+    const d = new Date(Date.now() + 7 * 86400000);
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T23:59`;
+  },
+  // 把 datetime-local 的值规整成 ISO-8601
+  toIso(v) {
+    if (!v) return v;
+    return v.length === 16 ? v + ':00' : v;
+  },
+
+  // 文本截断（工具调用结果摘要）
+  truncate(v, max) {
+    let s = (v === null || v === undefined) ? '' : String(v);
+    s = s.replace(/\s+/g, ' ').trim();
+    return s.length > max ? s.slice(0, max) + ' …' : s;
+  },
+
+  // 金额/数值安全解析
+  num(v) { const n = Number(v); return isNaN(n) ? 0 : n; },
+
+  // 百分比
+  percent(a, b) { return b > 0 ? Math.round(a / b * 100) : 0; }
+};
+
+/* ---------------------------------------------------------------
+ * 加载状态 / 错误提示片段
+ * --------------------------------------------------------------- */
+const Loading = {
+  html: '<div class="loading-box"><span class="spinner"></span>加载中…</div>',
+  error(msg) { return `<div class="error-box">⚠️ ${Utils.escape(msg)}</div>`; }
+};
+
+/* ---------------------------------------------------------------
+ * UI 组件（toast / modal / 徽标 / 表格空行）
+ * --------------------------------------------------------------- */
+const UI = {
+  toast(msg, type = 'info') {
+    const div = document.createElement('div');
+    div.className = `toast-msg ${type}`;
+    div.textContent = msg;
+    document.getElementById('toast').appendChild(div);
+    setTimeout(() => { div.remove(); }, 3600);
+  },
+
+  modal(title, bodyHtml, footerHtml, large = false) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    document.getElementById('modalFooter').innerHTML = footerHtml || '';
+    document.getElementById('modal').className = large ? 'modal large' : 'modal';
+    document.getElementById('modalOverlay').classList.add('show');
+  },
+
+  closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  },
+
+  setModalBody(html) {
+    document.getElementById('modalBody').innerHTML = html;
+  },
+
+  confirm(msg, onConfirm) {
+    this.modal('确认', `<p style="font-size:15px;line-height:1.6;">${this.escape(msg)}</p>`,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-danger" onclick="(${onConfirm})();UI.closeModal();">确认</button>`);
+  },
+
+  escape(s) { return Utils.escapeHtml(s); },
+
+  badge(role) {
+    const map = { student: 'badge-student', teacher: 'badge-teacher', admin: 'badge-admin' };
+    const labels = { student: '学生', teacher: '教师', admin: '管理员' };
+    return `<span class="badge ${map[role] || 'badge-default'}">${labels[role] || role || '-'}</span>`;
+  },
+
+  statusBadge(status) {
+    return Number(status) === 1
+      ? '<span class="badge badge-success">已发布</span>'
+      : '<span class="badge badge-danger">已撤回</span>';
+  },
+
+  subBadge(submitted) {
+    return submitted
+      ? '<span class="badge badge-success">已提交</span>'
+      : '<span class="badge badge-warning">未提交</span>';
+  },
+
+  emptyRow(colspan, text = '暂无数据') {
+    return `<tr><td colspan="${colspan}" class="table-empty">${text}</td></tr>`;
+  },
+
+  statCard(num, label) {
+    return `<div class="stat-card"><div class="stat-num">${this.escape(num)}</div><div class="stat-label">${this.escape(label)}</div></div>`;
+  },
+
+  closeFooter() { return '<button class="btn btn-default" onclick="UI.closeModal()">关闭</button>'; }
+};
+
+/* ---------------------------------------------------------------
+ * 登录态（token 存 sessionStorage；用户信息只在内存，刷新后用 /api/me 重新拉取）
+ * --------------------------------------------------------------- */
+const Session = {
+  TOKEN_KEY: 'edu_token',
+  _memToken: null,   // file:// 等不允许 sessionStorage 的环境下降级为内存
+  user: null,
+  _store() {
+    try { return window.sessionStorage; } catch (e) { return null; }
+  },
+  token() {
+    const st = this._store();
+    if (!st) return this._memToken;
+    try { return st.getItem(this.TOKEN_KEY); } catch (e) { return this._memToken; }
+  },
+  save(token, user) {
+    this._memToken = token;
+    const st = this._store();
+    if (st) { try { st.setItem(this.TOKEN_KEY, token); } catch (e) { /* 忽略：降级为内存保存 */ } }
+    this.user = user;
+  },
+  clear() {
+    this._memToken = null;
+    const st = this._store();
+    if (st) { try { st.removeItem(this.TOKEN_KEY); } catch (e) { /* 忽略 */ } }
+    this.user = null;
+  }
+};
+
+/* ---------------------------------------------------------------
+ * 统一 API 辅助函数：拼 Authorization、解析错误、401 自动登出
+ * --------------------------------------------------------------- */
+const API = {
+  // 所有请求同源，只写 /api 前缀，不写死域名或端口
+  async request(path, options) {
+    options = options || {};
+    const opts = { method: options.method || 'GET', headers: {} };
+    const token = Session.token();
+    if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+    if (options.body !== undefined && options.body !== null) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(options.body);
+    }
+
+    let res;
+    try {
+      res = await fetch('/api' + path, opts);
+    } catch (e) {
+      throw new Error('网络请求失败，请确认后端服务已启动（' + (e && e.message ? e.message : 'fetch error') + '）');
+    }
+
+    let data = null;
+    const text = await res.text();
+    if (text) {
+      try { data = JSON.parse(text); } catch (e) { data = text; }
+    }
+
+    if (!res.ok) {
+      // 401：token 失效 → 自动登出回登录页（登录接口自身除外）
+      if (res.status === 401 && !options.skipAuthHandler) Auth.handleUnauthorized();
+      const msg = (data && data.message) ? data.message : `请求失败（HTTP ${res.status}）`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.code = data && data.error;
+      throw err;
+    }
+    return data;
+  },
+
+  get(path) { return this.request(path); },
+  post(path, body) { return this.request(path, { method: 'POST', body }); },
+  put(path, body) { return this.request(path, { method: 'PUT', body }); },
+  del(path) { return this.request(path, { method: 'DELETE' }); }
+};
+
+/* ---------------------------------------------------------------
+ * 认证
+ * --------------------------------------------------------------- */
+const Auth = {
+  // 一键填充演示账号
+  fill(username, password) {
+    document.getElementById('loginUsername').value = username;
+    document.getElementById('loginPassword').value = password;
+    const btn = document.getElementById('loginBtn');
+    btn.focus();
+    UI.toast(`已填充演示账号：${username}`, 'info');
+  },
+
+  async login() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    if (!username || !password) { UI.toast('请输入用户名和密码', 'error'); return; }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = '登录中…';
+    try {
+      const data = await API.request('/auth/login', {
+        method: 'POST',
+        body: { username, password },
+        skipAuthHandler: true
+      });
+      Session.save(data.token, data.user);
+      UI.toast(`欢迎回来，${data.user.realName || data.user.username}！`, 'success');
+      this.enterApp();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '登 录';
+    }
+  },
+
+  enterApp() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    App.currentTab = null;
+    App.render();
+  },
+
+  logout() {
+    Session.clear();
+    this.showLogin();
+    UI.toast('已退出登录', 'info');
+  },
+
+  // 401 统一处理
+  handleUnauthorized() {
+    if (!Session.token()) return;
+    Session.clear();
+    this.showLogin();
+    UI.toast('登录状态已失效，请重新登录', 'error');
+  },
+
+  showLogin() {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('loginPassword').value = '';
+    UI.closeModal();
+  },
+
+  // 刷新页面时用 token 调 GET /api/me 恢复身份
+  async restore() {
+    if (!Session.token()) return;
+    try {
+      const user = await API.get('/me');
+      Session.user = user;
+      this.enterApp();
+    } catch (e) {
+      Session.clear();
+      this.showLogin();
+    }
+  }
+};
+
+/* ---------------------------------------------------------------
+ * 公共数据辅助（下拉框等，均来自真实接口）
+ * --------------------------------------------------------------- */
+const Helper = {
+  _nodes: [],   // 最近一次加载的知识点扁平列表（用于节点详情弹窗）
+
+  // 不同角色可用的课程下拉数据源（都是 API.md 中已定义的接口）
+  async courses() {
+    const role = Session.user ? Session.user.role : null;
+    if (role === 'teacher') return (await API.get('/teacher/courses')) || [];
+    if (role === 'admin') return (await API.get('/admin/courses')) || [];
+    const mine = (await API.get('/student/my-courses')) || [];
+    if (mine.length) return mine;
+    return (await API.get('/student/courses')) || [];  // 还没选课时退化为全部课程
+  },
+
+  courseSelectHtml(courses, selectedId, extraAttrs) {
+    if (!courses || !courses.length) return '<option value="">暂无课程</option>';
+    return courses.map(c =>
+      `<option value="${Utils.js(c.courseId)}" ${c.courseId === selectedId ? 'selected' : ''}>${Utils.escape(c.courseId)} - ${Utils.escape(c.name)}</option>`
+    ).join('');
+  },
+
+  // 知识点：把 children 递归结构拍平，再按 parentId 重建（两种返回形态都能渲染）
+  flattenNodes(nodes, out) {
+    out = out || [];
+    (nodes || []).forEach(n => {
+      const copy = Object.assign({}, n);
+      const children = copy.children;
+      delete copy.children;
+      out.push(copy);
+      if (children && children.length) Helper.flattenNodes(children, out);
+    });
+    return out;
+  },
+
+  buildTree(nodes, parentId) {
+    parentId = (parentId === undefined) ? null : parentId;
+    const children = (nodes || [])
+      .filter(n => ((n.parentId === undefined ? null : n.parentId) === parentId))
+      .sort((a, b) => (a.orderNum || 0) - (b.orderNum || 0));
+    if (!children.length) return '';
+    let html = '<ul>';
+    for (const n of children) {
+      html += `<li>
+        <div><span class="node-name" onclick="Helper.showNode(${n.nodeId})">${Utils.escape(n.nodeName)}</span></div>
+        ${n.content ? `<span class="node-content">${Utils.escape(n.content)}</span>` : ''}
+        ${this.buildTree(nodes, n.nodeId)}
+      </li>`;
+    }
+    return html + '</ul>';
+  },
+
+  showNode(nodeId) {
+    const n = this._nodes.find(x => String(x.nodeId) === String(nodeId));
+    if (!n) return;
+    UI.modal(n.nodeName || '知识点',
+      `<p style="font-size:13px;color:#888;margin-bottom:8px;">节点 ID：${Utils.escape(n.nodeId)}　排序：${Utils.escape(n.orderNum)}</p>
+       <p style="line-height:1.9;">${Utils.escape(n.content || '暂无内容')}</p>`,
+      UI.closeFooter());
+  },
+
+  // 知识点树弹窗（学生端「查看知识点」）
+  async openKnowledgeModal(courseId, courseName) {
+    UI.modal('知识点 - ' + (courseName || courseId), Loading.html, UI.closeFooter(), true);
+    try {
+      const data = await API.get(`/student/courses/${encodeURIComponent(courseId)}/knowledge`);
+      const flat = Helper.flattenNodes(data);
+      Helper._nodes = flat;
+      const tree = Helper.buildTree(flat, null);
+      UI.setModalBody(`<div class="knowledge-tree scrollable">${tree || '<p class="text-muted text-center">暂无知识点</p>'}</div>`);
+    } catch (e) {
+      UI.setModalBody(Loading.error(e.message));
+      UI.toast(e.message, 'error');
+    }
+  }
+};
+
+/* ---------------------------------------------------------------
+ * 主应用控制器（按角色渲染菜单）
+ * --------------------------------------------------------------- */
+const App = {
+  currentTab: null,
+
+  async render() {
+    const user = Session.user;
+    if (!user) return;
+
+    document.getElementById('userInfo').innerHTML =
+      `${Utils.escape(user.realName || user.username)} ${UI.badge(user.role)}`;
+
+    const tabs = this.getTabsForRole(user.role);
+    if (!tabs.length) { UI.toast('未知角色：' + user.role, 'error'); return; }
+    if (!this.currentTab || !tabs.find(t => t.id === this.currentTab)) this.currentTab = tabs[0].id;
+
+    document.getElementById('navTabs').innerHTML = tabs.map(t =>
+      `<div class="nav-tab ${t.id === this.currentTab ? 'active' : ''} ${t.highlight ? 'highlight' : ''}" onclick="App.switchTab('${Utils.js(t.id)}')">${t.label}</div>`
+    ).join('');
+
+    await this.renderTab();
+  },
+
+  switchTab(tabId) {
+    this.currentTab = tabId;
+    this.render();
+  },
+
+  // 三套菜单：学生 / 教师 / 管理员，另外所有角色都有 AI 助手与性能基准
+  getTabsForRole(role) {
+    const common = [
+      { id: 'agent', label: '🤖 AI 学习助手', highlight: true },
+      { id: 'benchmark', label: '📊 性能基准' }
+    ];
+    if (role === 'student') return [
+      { id: 'student_courses', label: '选课中心' },
+      { id: 'student_my_courses', label: '我的课程' },
+      { id: 'student_assignments', label: '我的作业' },
+      ...common
+    ];
+    if (role === 'teacher') return [
+      { id: 'teacher_courses', label: '我的课程' },
+      { id: 'teacher_assignments', label: '作业管理' },
+      { id: 'teacher_stats', label: '学情统计' },
+      { id: 'teacher_grades', label: '成绩录入' },
+      ...common
+    ];
+    if (role === 'admin') return [
+      { id: 'admin_users', label: '用户管理' },
+      { id: 'admin_courses', label: '课程管理' },
+      ...common
+    ];
+    return [];
+  },
+
+  async renderTab() {
+    const tab = this.currentTab;
+    try {
+      if (tab === 'agent') await Agent.render();
+      else if (tab === 'benchmark') await Bench.render();
+      else if (tab.startsWith('admin_')) await Admin.render(tab);
+      else if (tab.startsWith('teacher_')) await Teacher.render(tab);
+      else if (tab.startsWith('student_')) await Student.render(tab);
+    } catch (e) {
+      document.getElementById('mainContent').innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  }
+};
+
+/* =====================================================================
+ * 学生端
+ * ===================================================================== */
+const Student = {
+  async render(tab) {
+    if (tab === 'student_courses') await this.renderCourses();
+    else if (tab === 'student_my_courses') await this.renderMyCourses();
+    else if (tab === 'student_assignments') await this.renderAssignments();
+  },
+
+  /* ---------- 选课中心：GET /api/student/courses + 选课/退课 ---------- */
+  async renderCourses() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>选课中心</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/student/courses</span>
+          <button class="btn btn-default" onclick="Student.renderCourses()">刷新</button>
+        </div>
+      </div>
+      <div id="courseArea"></div>`;
+    const area = document.getElementById('courseArea');
+    area.innerHTML = Loading.html;
+    try {
+      const courses = await API.get('/student/courses') || [];
+      const rows = courses.map(co => {
+        const selectedCount = Utils.num(co.selectedCount);
+        const capacity = Utils.num(co.capacity);
+        const full = selectedCount >= capacity;
+        const action = co.enrolled
+          ? `<button class="btn btn-sm btn-danger" onclick="Student.dropCourse('${Utils.js(co.courseId)}')">退课</button>`
+          : `<button class="btn btn-sm btn-success" ${full ? 'disabled' : ''} onclick="Student.selectCourse('${Utils.js(co.courseId)}')">${full ? '已满' : '选课'}</button>`;
+        return `<tr>
+          <td>${Utils.escape(co.courseId)}</td>
+          <td>${Utils.escape(co.name)}</td>
+          <td>${Utils.escape(co.credit)}</td>
+          <td>${Utils.escape(co.teacherName || '-')}</td>
+          <td>${selectedCount}/${capacity}</td>
+          <td>${co.enrolled ? '<span class="badge badge-success">已选</span>' : '<span class="badge badge-default">未选</span>'}</td>
+          <td>${action}</td>
+        </tr>`;
+      }).join('');
+      area.innerHTML = `
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>课程号</th><th>课程名</th><th>学分</th><th>授课教师</th><th>已选/容量</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(7, '暂无课程')}</tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  async selectCourse(courseId) {
+    try {
+      const r = await API.post(`/student/courses/${encodeURIComponent(courseId)}/select`);
+      UI.toast(`选课成功，当前已选 ${r && r.selectedCount !== undefined ? r.selectedCount : '?'} 人`, 'success');
+    } catch (e) {
+      // 409 COURSE_FULL 等后端错误，直接展示 message
+      UI.toast(e.message, 'error');
+    }
+    this.renderCourses();
+  },
+
+  async dropCourse(courseId) {
+    try {
+      const r = await API.del(`/student/courses/${encodeURIComponent(courseId)}/select`);
+      UI.toast(`退课成功，当前已选 ${r && r.selectedCount !== undefined ? r.selectedCount : '?'} 人`, 'success');
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+    this.renderCourses();
+  },
+
+  /* ---------- 我的课程（含成绩）：GET /api/student/my-courses ---------- */
+  async renderMyCourses() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>我的课程</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/student/my-courses</span>
+          <button class="btn btn-default" onclick="Student.renderMyCourses()">刷新</button>
+        </div>
+      </div>
+      <div id="myCourseArea"></div>`;
+    const area = document.getElementById('myCourseArea');
+    area.innerHTML = Loading.html;
+    try {
+      const list = await API.get('/student/my-courses') || [];
+      const graded = list.filter(x => x.grade !== null && x.grade !== undefined);
+      const avg = graded.length ? (graded.reduce((s, x) => s + Utils.num(x.grade), 0) / graded.length).toFixed(1) : '-';
+      const totalCredit = list.reduce((s, x) => s + Utils.num(x.credit), 0);
+
+      const rows = list.map(co => `
+        <tr>
+          <td>${Utils.escape(co.courseId)}</td>
+          <td>${Utils.escape(co.name)}</td>
+          <td>${Utils.escape(co.credit)}</td>
+          <td>${Utils.escape(co.teacherName || '-')}</td>
+          <td>${Utils.grade(co.grade)}</td>
+          <td><button class="btn btn-sm btn-default" onclick="Helper.openKnowledgeModal('${Utils.js(co.courseId)}','${Utils.js(co.name)}')">查看知识点</button></td>
+        </tr>`).join('');
+
+      area.innerHTML = `
+        <div class="stats-grid">
+          ${UI.statCard(list.length, '已选课程数')}
+          ${UI.statCard(totalCredit, '总学分')}
+          ${UI.statCard(graded.length, '已出成绩门数')}
+          ${UI.statCard(avg, '平均分')}
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>课程号</th><th>课程名</th><th>学分</th><th>授课教师</th><th>成绩</th><th>知识点</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(6, '暂无选课，请到「选课中心」选课')}</tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  /* ---------- 我的作业（含提交状态）：GET /api/student/assignments ---------- */
+  async renderAssignments() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>我的作业</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/student/assignments</span>
+          <button class="btn btn-default" onclick="Student.renderAssignments()">刷新</button>
+        </div>
+      </div>
+      <div id="myAssignArea"></div>`;
+    const area = document.getElementById('myAssignArea');
+    area.innerHTML = Loading.html;
+    try {
+      const list = await API.get('/student/assignments') || [];
+      const submitted = list.filter(a => a.submitted).length;
+      const graded = list.filter(a => a.submission && a.submission.grade !== null && a.submission.grade !== undefined).length;
+      const published = list.filter(a => Number(a.status) === 1).length;
+
+      const rows = list.map(a => {
+        const sub = a.submission || null;
+        const closed = Number(a.status) !== 1;
+        const action = closed
+          ? '<span class="text-muted">已撤回，无法提交</span>'
+          : `<button class="btn btn-sm ${sub ? 'btn-primary' : 'btn-success'}" onclick="Student.submitModal(${a.assignId},'${Utils.js(a.title)}')">${sub ? '重新提交' : '提交作业'}</button>`;
+        return `<tr>
+          <td>${Utils.escape(a.courseId)}<br><span class="text-muted">${Utils.escape(a.courseName || '')}</span></td>
+          <td>${Utils.escape(a.title)}</td>
+          <td>${Utils.escape(Utils.truncate(a.description, 40) || '-')}</td>
+          <td>${Utils.escape(Utils.fmtTime(a.deadline))}</td>
+          <td>${UI.statusBadge(a.status)} ${UI.subBadge(a.submitted)}</td>
+          <td>${sub ? Utils.escape(Utils.truncate(sub.content, 30)) : '<span class="text-muted">未提交</span>'}</td>
+          <td>${sub ? Utils.grade(sub.grade) : '-'}</td>
+          <td>${sub ? (Utils.escape(sub.feedback) || '<span class="text-muted">无</span>') : '-'}</td>
+          <td>${action}</td>
+        </tr>`;
+      }).join('');
+
+      area.innerHTML = `
+        <div class="stats-grid">
+          ${UI.statCard(list.length, '作业总数')}
+          ${UI.statCard(published, '进行中（已发布）')}
+          ${UI.statCard(submitted, '已提交')}
+          ${UI.statCard(graded, '已批改')}
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>课程</th><th>标题</th><th>描述</th><th>截止时间</th><th>状态</th><th>我的提交</th><th>成绩</th><th>评语</th><th>操作</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(9, '暂无作业')}</tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  submitModal(assignId, title) {
+    UI.modal('提交作业 - ' + title, `
+      <div class="form-group">
+        <label>作业内容 *</label>
+        <textarea id="f_content" style="min-height:160px;" placeholder="请输入作业内容…"></textarea>
+      </div>
+      <p class="hint-text">接口：POST /api/student/assignments/${assignId}/submit</p>`,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-primary" onclick="Student.doSubmit(${assignId})">提交</button>`);
+  },
+
+  async doSubmit(assignId) {
+    const content = document.getElementById('f_content').value.trim();
+    if (!content) { UI.toast('请输入作业内容', 'error'); return; }
+    try {
+      const r = await API.post(`/student/assignments/${assignId}/submit`, { content });
+      UI.toast(`作业提交成功（subId=${r && r.subId !== undefined ? r.subId : '-'}）`, 'success');
+      UI.closeModal();
+      this.renderAssignments();
+    } catch (e) {
+      // 409 ASSIGNMENT_CLOSED 等错误直接把 message 展示给用户
+      UI.toast(e.message, 'error');
+    }
+  }
+};
+
+/* =====================================================================
+ * 教师端
+ * ===================================================================== */
+const Teacher = {
+  courses: null,          // 课程缓存（来自 /api/teacher/courses）
+  selectedCourseId: null, // 我的课程页选中课程
+  pendingCourseId: null,  // 切 Tab 时预选课程
+  _subView: null,         // 提交列表弹窗上下文
+
+  async render(tab) {
+    if (tab === 'teacher_courses') await this.renderCourses();
+    else if (tab === 'teacher_assignments') await this.renderAssignments();
+    else if (tab === 'teacher_stats') await this.renderStats();
+    else if (tab === 'teacher_grades') await this.renderGrades();
+  },
+
+  async loadCourses(force) {
+    if (force || !this.courses) this.courses = await API.get('/teacher/courses') || [];
+    return this.courses;
+  },
+
+  gotoCourseTab(courseId, tab) {
+    this.pendingCourseId = courseId;
+    App.switchTab(tab);
+  },
+
+  /* ---------- 我的课程：GET /api/teacher/courses ---------- */
+  async renderCourses() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>我的课程</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/teacher/courses</span>
+          <button class="btn btn-default" onclick="Teacher.renderCourses()">刷新</button>
+        </div>
+      </div>
+      <div class="split-panel">
+        <div class="left"><div id="tCourseArea"></div></div>
+        <div class="right">
+          <div class="info-card" id="tCourseDetail">
+            <h3>课程详情</h3>
+            <p class="text-muted" style="text-align:center;padding:20px 0;">请从左侧选择一门课程查看详情</p>
+          </div>
+        </div>
+      </div>`;
+    const area = document.getElementById('tCourseArea');
+    area.innerHTML = Loading.html;
+    try {
+      const courses = await this.loadCourses(true);
+      const rows = courses.map(co => `
+        <tr class="cursor-pointer" onclick="Teacher.selectCourse('${Utils.js(co.courseId)}')">
+          <td>${Utils.escape(co.courseId)}</td>
+          <td>${Utils.escape(co.name)}</td>
+          <td>${Utils.escape(co.credit)}</td>
+          <td>${Utils.num(co.selectedCount)}/${Utils.num(co.capacity)}</td>
+          <td><button class="btn btn-sm btn-default" onclick="event.stopPropagation();Teacher.selectCourse('${Utils.js(co.courseId)}')">查看</button></td>
+        </tr>`).join('');
+      area.innerHTML = `
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>课程号</th><th>课程名</th><th>学分</th><th>已选/容量</th><th>操作</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(5, '暂无课程')}</tbody>
+          </table>
+        </div>`;
+      if (courses.length) this.selectCourse(this.selectedCourseId || courses[0].courseId);
+      else document.getElementById('tCourseDetail').innerHTML = '<h3>课程详情</h3><p class="text-muted text-center">暂无课程</p>';
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  // 课程详情来自已拉取的课程列表（真实接口数据）
+  selectCourse(courseId) {
+    this.selectedCourseId = courseId;
+    const co = (this.courses || []).find(x => x.courseId === courseId);
+    if (!co) return;
+    document.getElementById('tCourseDetail').innerHTML = `
+      <h3>${Utils.escape(co.name)}</h3>
+      <p style="margin:8px 0;"><b>课程号：</b>${Utils.escape(co.courseId)}</p>
+      <p style="margin:8px 0;"><b>学分：</b>${Utils.escape(co.credit)}</p>
+      <p style="margin:8px 0;"><b>容量：</b>${Utils.num(co.capacity)}（已选 ${Utils.num(co.selectedCount)}）</p>
+      <p style="margin:8px 0;"><b>课程介绍：</b></p>
+      <p style="background:#f9fafb;padding:12px;border-radius:8px;margin-top:4px;">${Utils.escape(co.description || '暂无介绍')}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+        <button class="btn btn-sm btn-primary" onclick="Teacher.viewStudents('${Utils.js(co.courseId)}','${Utils.js(co.name)}')">学生名单</button>
+        <button class="btn btn-sm btn-default" onclick="Teacher.gotoCourseTab('${Utils.js(co.courseId)}','teacher_assignments')">作业管理</button>
+        <button class="btn btn-sm btn-default" onclick="Teacher.gotoCourseTab('${Utils.js(co.courseId)}','teacher_stats')">学情统计</button>
+        <button class="btn btn-sm btn-default" onclick="Teacher.gotoCourseTab('${Utils.js(co.courseId)}','teacher_grades')">成绩录入</button>
+      </div>`;
+  },
+
+  /* ---------- 课程学生名单：GET /api/teacher/courses/{courseId}/students ---------- */
+  async viewStudents(courseId, courseName) {
+    UI.modal('学生名单 - ' + (courseName || courseId), Loading.html, UI.closeFooter(), true);
+    try {
+      const students = await API.get(`/teacher/courses/${encodeURIComponent(courseId)}/students`) || [];
+      const rows = students.map(s => `
+        <tr>
+          <td>${Utils.escape(s.studentId)}</td>
+          <td>${Utils.escape(s.realName)}</td>
+          <td>${Utils.escape(s.major || '-')}</td>
+          <td>${Utils.grade(s.grade)}</td>
+        </tr>`).join('');
+      UI.setModalBody(`
+        <p class="hint-text mb-16">接口：GET /api/teacher/courses/${Utils.escape(courseId)}/students，共 ${students.length} 人</p>
+        <div class="table-wrapper scrollable">
+          <table class="sub-table">
+            <thead><tr><th>学号</th><th>姓名</th><th>专业</th><th>成绩</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(4, '暂无学生')}</tbody>
+          </table>
+        </div>`);
+    } catch (e) {
+      UI.setModalBody(Loading.error(e.message));
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  /* ---------- 作业管理：GET/POST /api/teacher/courses/{courseId}/assignments ---------- */
+  async renderAssignments() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>作业管理</h2>
+        <div class="toolbar">
+          <span class="hint-text">作业列表来自 GET /api/teacher/courses/{courseId}/assignments</span>
+          <select id="assignCourseSelect"></select>
+          <button class="btn btn-primary" onclick="Teacher.publishModal()">+ 发布作业</button>
+          <button class="btn btn-default" onclick="Teacher.loadAssignments()">刷新</button>
+        </div>
+      </div>
+      <div id="assignArea"></div>`;
+    const area = document.getElementById('assignArea');
+    area.innerHTML = Loading.html;
+    try {
+      const courses = await this.loadCourses(true);
+      const sel = document.getElementById('assignCourseSelect');
+      if (!courses.length) {
+        sel.innerHTML = '<option value="">暂无课程</option>';
+        area.innerHTML = '<div class="table-empty">暂无课程</div>';
+        return;
+      }
+      const pending = this.pendingCourseId; this.pendingCourseId = null;
+      sel.innerHTML = Helper.courseSelectHtml(courses, pending || sel.value || courses[0].courseId);
+      sel.onchange = () => this.loadAssignments();
+      await this.loadAssignments();
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  async loadAssignments() {
+    const sel = document.getElementById('assignCourseSelect');
+    const area = document.getElementById('assignArea');
+    if (!sel || !sel.value) { area.innerHTML = '<div class="table-empty">请选择课程</div>'; return; }
+    area.innerHTML = Loading.html;
+    const courseId = sel.value;
+    try {
+      const list = await API.get(`/teacher/courses/${encodeURIComponent(courseId)}/assignments`) || [];
+      const rows = list.map(a => `
+        <tr>
+          <td>${Utils.escape(a.title)}</td>
+          <td>${Utils.escape(Utils.truncate(a.description, 40) || '-')}</td>
+          <td>${Utils.escape(Utils.fmtTime(a.deadline))}</td>
+          <td>${Utils.escape(Utils.fmtTime(a.publishTime))}</td>
+          <td>${UI.statusBadge(a.status)}</td>
+          <td>
+            <button class="btn btn-sm btn-default" onclick="Teacher.viewSubmissions(${a.assignId},'${Utils.js(a.title)}')">查看提交</button>
+            ${Number(a.status) === 1
+              ? `<button class="btn btn-sm btn-danger" onclick="Teacher.revokeAssignment(${a.assignId},'${Utils.js(a.title)}')">撤回作业</button>`
+              : '<span class="text-muted" style="font-size:12px;">已撤回（接口仅支持撤回，无恢复）</span>'}
+          </td>
+        </tr>`).join('');
+      area.innerHTML = `
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>标题</th><th>描述</th><th>截止时间</th><th>发布时间</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(6, '该课程暂无作业')}</tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  publishModal() {
+    const sel = document.getElementById('assignCourseSelect');
+    const courseId = sel ? sel.value : '';
+    if (!courseId) { UI.toast('请先选择课程', 'error'); return; }
+    UI.modal('发布作业 - ' + courseId, `
+      <div class="form-group"><label>作业标题 *</label><input type="text" id="f_title" placeholder="例如：实验一"></div>
+      <div class="form-group"><label>作业描述</label><textarea id="f_description" placeholder="作业要求…"></textarea></div>
+      <div class="form-group"><label>截止时间 *（ISO-8601）</label><input type="datetime-local" id="f_deadline" value="${Utils.defaultDeadline()}"></div>
+      <p class="hint-text">接口：POST /api/teacher/courses/${Utils.escape(courseId)}/assignments</p>`,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-primary" onclick="Teacher.doPublish('${Utils.js(courseId)}')">发布</button>`);
+  },
+
+  async doPublish(courseId) {
+    const title = document.getElementById('f_title').value.trim();
+    const description = document.getElementById('f_description').value.trim();
+    const deadline = Utils.toIso(document.getElementById('f_deadline').value.trim());
+    if (!title) { UI.toast('请输入作业标题', 'error'); return; }
+    if (!deadline) { UI.toast('请选择截止时间', 'error'); return; }
+    try {
+      const r = await API.post(`/teacher/courses/${encodeURIComponent(courseId)}/assignments`, { title, description, deadline });
+      UI.toast(`作业已发布（assignId=${r && r.assignId !== undefined ? r.assignId : '-'}）`, 'success');
+      UI.closeModal();
+      this.loadAssignments();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  revokeAssignment(assignId, title) {
+    UI.modal('确认撤回',
+      `<p style="font-size:15px;line-height:1.6;">确定要撤回作业 <b>${Utils.escape(title)}</b> 吗？<br>撤回后学生将无法提交。</p>
+       <p class="hint-text">接口：DELETE /api/teacher/assignments/${assignId}</p>`,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-danger" onclick="Teacher.doRevoke(${assignId})">确认撤回</button>`);
+  },
+
+  async doRevoke(assignId) {
+    try {
+      const r = await API.del(`/teacher/assignments/${assignId}`);
+      UI.toast(`作业已撤回（status=${r && r.status !== undefined ? r.status : 0}）`, 'success');
+      UI.closeModal();
+      this.loadAssignments();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  /* ---------- 查看提交 + 评分 ---------- */
+  async viewSubmissions(assignId, title) {
+    this._subView = { assignId, title };
+    UI.modal('作业提交 - ' + title, Loading.html, UI.closeFooter(), true);
+    await this.fillSubmissions();
+  },
+
+  async fillSubmissions() {
+    const v = this._subView;
+    if (!v) return;
+    try {
+      const subs = await API.get(`/teacher/assignments/${v.assignId}/submissions`) || [];
+      const rows = subs.map(s => `
+        <tr>
+          <td>${Utils.escape(s.studentId)}</td>
+          <td>${Utils.escape(s.studentName || '-')}</td>
+          <td>${Utils.escape(Utils.truncate(s.content, 60) || '-')}</td>
+          <td>${Utils.escape(Utils.fmtTime(s.submitTime))}</td>
+          <td>${Utils.grade(s.grade)}</td>
+          <td>${Utils.escape(s.feedback) || '<span class="text-muted">无</span>'}</td>
+          <td><button class="btn btn-sm btn-primary" onclick="Teacher.gradeModal(${s.subId},'${Utils.js(s.studentName || s.studentId)}')">批改</button></td>
+        </tr>`).join('');
+      UI.setModalBody(`
+        <p class="hint-text mb-16">作业：<b>${Utils.escape(v.title)}</b>　接口：GET /api/teacher/assignments/${v.assignId}/submissions　共 ${subs.length} 份提交</p>
+        <div class="table-wrapper scrollable">
+          <table class="sub-table">
+            <thead><tr><th>学号</th><th>姓名</th><th>提交内容</th><th>提交时间</th><th>成绩</th><th>评语</th><th>操作</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(7, '暂无提交')}</tbody>
+          </table>
+        </div>`);
+    } catch (e) {
+      UI.setModalBody(Loading.error(e.message));
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  gradeModal(subId, studentName) {
+    UI.modal('批改作业 - ' + studentName, `
+      <div class="form-group"><label>成绩（0-100）</label><input type="number" id="f_grade" min="0" max="100"></div>
+      <div class="form-group"><label>评语</label><textarea id="f_feedback" placeholder="评语…"></textarea></div>
+      <p class="hint-text">接口：POST /api/teacher/submissions/${subId}/grade</p>`,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-primary" onclick="Teacher.doGrade(${subId})">保存</button>`);
+  },
+
+  async doGrade(subId) {
+    const raw = document.getElementById('f_grade').value.trim();
+    const grade = raw === '' ? null : Number(raw);
+    if (grade !== null && (isNaN(grade) || grade < 0 || grade > 100)) { UI.toast('成绩需在 0-100 之间', 'error'); return; }
+    const feedback = document.getElementById('f_feedback').value.trim();
+    try {
+      await API.post(`/teacher/submissions/${subId}/grade`, { grade, feedback });
+      UI.toast('批改已保存', 'success');
+      UI.closeModal();
+      // 重新打开提交列表，保证看到的是接口最新数据
+      const v = this._subView;
+      if (v) await this.viewSubmissions(v.assignId, v.title);
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  /* ---------- 学情完成度统计：GET /api/teacher/courses/{courseId}/stats ---------- */
+  async renderStats() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>学情完成度统计</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/teacher/courses/{courseId}/stats（后端已消除 N+1）</span>
+          <select id="statsCourseSelect"></select>
+          <button class="btn btn-default" onclick="Teacher.renderStats()">刷新</button>
+        </div>
+      </div>
+      <div id="statsArea"></div>`;
+    const area = document.getElementById('statsArea');
+    area.innerHTML = Loading.html;
+    let courses;
+    try {
+      courses = await this.loadCourses(true);
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+      return;
+    }
+    const sel = document.getElementById('statsCourseSelect');
+    if (!courses.length) {
+      sel.innerHTML = '<option value="">暂无课程</option>';
+      area.innerHTML = '<div class="table-empty">暂无课程</div>';
+      return;
+    }
+    const pending = this.pendingCourseId; this.pendingCourseId = null;
+    sel.innerHTML = Helper.courseSelectHtml(courses, pending || sel.value || courses[0].courseId);
+    sel.onchange = () => this.loadStats();
+    await this.loadStats();
+  },
+
+  async loadStats() {
+    const sel = document.getElementById('statsCourseSelect');
+    const area = document.getElementById('statsArea');
+    if (!sel || !sel.value) { area.innerHTML = '<div class="table-empty">请选择课程</div>'; return; }
+    area.innerHTML = Loading.html;
+    const courseId = sel.value;
+    try {
+      const s = await API.get(`/teacher/courses/${encodeURIComponent(courseId)}/stats`);
+      const students = s.students || [];
+      const totalSubmitted = students.reduce((n, x) => n + Utils.num(x.submitted), 0);
+      const totalNeed = students.reduce((n, x) => n + Utils.num(x.totalAssignments), 0);
+      const overall = Utils.percent(totalSubmitted, totalNeed);
+
+      const rows = students.map(st => {
+        const total = Utils.num(st.totalAssignments);
+        const sub = Utils.num(st.submitted);
+        const unsub = Utils.num(st.unsubmitted);
+        const rate = Utils.percent(sub, total);
+        return `<tr data-unsubmitted="${unsub}">
+          <td>${Utils.escape(st.studentId)}</td>
+          <td>${Utils.escape(st.realName)}</td>
+          <td>${total}</td>
+          <td>${sub}</td>
+          <td>${unsub > 0 ? `<span class="badge badge-warning">${unsub}</span>` : '<span class="badge badge-success">0</span>'}</td>
+          <td style="min-width:130px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="progress" style="flex:1;"><i style="width:${rate}%;"></i></div>
+              <span>${rate}%</span>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+
+      area.innerHTML = `
+        <div class="stats-grid">
+          ${UI.statCard(Utils.num(s.totalStudents), '学生人数')}
+          ${UI.statCard(Utils.num(s.totalAssignments), '作业总数')}
+          ${UI.statCard(overall + '%', '整体提交率')}
+          ${UI.statCard(Utils.num(s.queryCount), '本次 SQL 查询次数')}
+        </div>
+        <div class="filter-bar">
+          <label><input type="checkbox" id="onlyUnfinished" onchange="Teacher.filterStats()"> 只显示有未完成作业的学生</label>
+          <span class="hint-text">queryCount = ${Utils.num(s.queryCount)}（对照 N+1 实现的 40+ 次查询，见「性能基准」面板）</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>学号</th><th>姓名</th><th>应交作业数</th><th>已提交</th><th>未提交</th><th>完成度</th></tr></thead>
+            <tbody id="statsBody">${rows || UI.emptyRow(6, '暂无数据')}</tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  filterStats() {
+    const el = document.getElementById('onlyUnfinished');
+    if (!el) return;
+    const only = el.checked;
+    document.querySelectorAll('#statsBody tr').forEach(row => {
+      if (!row.dataset.unsubmitted) return;
+      const unsub = Number(row.dataset.unsubmitted);
+      row.style.display = (only && unsub === 0) ? 'none' : '';
+    });
+  },
+
+  /* ---------- 成绩录入：GET/POST /api/teacher/courses/{courseId}/grades ---------- */
+  async renderGrades() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>成绩录入</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/teacher/courses/{courseId}/grades</span>
+          <select id="gradesCourseSelect"></select>
+          <button class="btn btn-default" onclick="Teacher.loadGrades()">刷新</button>
+        </div>
+      </div>
+      <div id="gradesArea"></div>`;
+    const area = document.getElementById('gradesArea');
+    area.innerHTML = Loading.html;
+    let courses;
+    try {
+      courses = await this.loadCourses(true);
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+      return;
+    }
+    const sel = document.getElementById('gradesCourseSelect');
+    if (!courses.length) {
+      sel.innerHTML = '<option value="">暂无课程</option>';
+      area.innerHTML = '<div class="table-empty">暂无课程</div>';
+      return;
+    }
+    const pending = this.pendingCourseId; this.pendingCourseId = null;
+    sel.innerHTML = Helper.courseSelectHtml(courses, pending || sel.value || courses[0].courseId);
+    sel.onchange = () => this.loadGrades();
+    await this.loadGrades();
+  },
+
+  async loadGrades() {
+    const sel = document.getElementById('gradesCourseSelect');
+    const area = document.getElementById('gradesArea');
+    if (!sel || !sel.value) { area.innerHTML = '<div class="table-empty">请选择课程</div>'; return; }
+    area.innerHTML = Loading.html;
+    const courseId = sel.value;
+    try {
+      const list = await API.get(`/teacher/courses/${encodeURIComponent(courseId)}/grades`) || [];
+      const graded = list.filter(x => x.grade !== null && x.grade !== undefined);
+      const avg = graded.length ? (graded.reduce((s, x) => s + Utils.num(x.grade), 0) / graded.length).toFixed(1) : '-';
+      const rows = list.map(s => `
+        <tr>
+          <td>${Utils.escape(s.studentId)}</td>
+          <td>${Utils.escape(s.realName)}</td>
+          <td>${Utils.escape(s.major || '-')}</td>
+          <td>${Utils.grade(s.grade)}</td>
+          <td>
+            <input type="number" min="0" max="100" style="width:90px;padding:5px 8px;border:1.5px solid #ddd;border-radius:6px;"
+                   data-student-id="${Utils.js(s.studentId)}" value="${s.grade === null || s.grade === undefined ? '' : Utils.escape(s.grade)}">
+            <button class="btn btn-sm btn-primary" onclick="Teacher.saveGrade('${Utils.js(courseId)}','${Utils.js(s.studentId)}')">保存</button>
+          </td>
+        </tr>`).join('');
+      area.innerHTML = `
+        <div class="stats-grid">
+          ${UI.statCard(list.length, '学生人数')}
+          ${UI.statCard(graded.length, '已录入成绩')}
+          ${UI.statCard(avg, '平均分')}
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>学号</th><th>姓名</th><th>专业</th><th>当前成绩</th><th>录入 / 修改</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(5, '该课程暂无学生')}</tbody>
+          </table>
+        </div>
+        <p class="hint-text mt-8">保存接口：POST /api/teacher/courses/${Utils.escape(courseId)}/grades &#123; studentId, grade &#125;</p>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  async saveGrade(courseId, studentId) {
+    const input = document.querySelector(`[data-student-id="${studentId.replace(/"/g, '')}"]`);
+    if (!input) { UI.toast('未找到输入框', 'error'); return; }
+    const raw = input.value.trim();
+    const grade = raw === '' ? null : Number(raw);
+    if (grade !== null && (isNaN(grade) || grade < 0 || grade > 100)) { UI.toast('成绩需在 0-100 之间', 'error'); return; }
+    try {
+      const r = await API.post(`/teacher/courses/${encodeURIComponent(courseId)}/grades`, { studentId, grade });
+      UI.toast(`成绩已保存（${r && r.studentId ? r.studentId : studentId} → ${r && r.grade !== undefined ? r.grade : grade}）`, 'success');
+      this.loadGrades();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  }
+};
+
+/* =====================================================================
+ * 管理员端
+ * ===================================================================== */
+const Admin = {
+  users: null,
+  filterRole: 'all',
+
+  async render(tab) {
+    if (tab === 'admin_users') await this.renderUsers();
+    else if (tab === 'admin_courses') await this.renderCourses();
+  },
+
+  /* ---------- 用户增删改查：/api/admin/users ---------- */
+  async renderUsers() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>用户管理</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/admin/users</span>
+          <select id="roleFilter">
+            <option value="all">全部角色</option>
+            <option value="student">学生</option>
+            <option value="teacher">教师</option>
+            <option value="admin">管理员</option>
+          </select>
+          <button class="btn btn-primary" onclick="Admin.addUserModal()">+ 添加用户</button>
+          <button class="btn btn-default" onclick="Admin.renderUsers()">刷新</button>
+        </div>
+      </div>
+      <div id="usersArea"></div>`;
+    const area = document.getElementById('usersArea');
+    const filter = document.getElementById('roleFilter');
+    filter.value = this.filterRole;
+    filter.onchange = () => { this.filterRole = filter.value; this.loadUsers(); };
+    await this.loadUsers();
+  },
+
+  async loadUsers() {
+    const area = document.getElementById('usersArea');
+    if (!area) return;
+    area.innerHTML = Loading.html;
+    try {
+      const list = await API.get('/admin/users') || [];
+      this.users = list;
+      const users = this.filterRole === 'all' ? list : list.filter(u => u.role === this.filterRole);
+      const rows = users.map(u => {
+        const idOrNum = u.role === 'student' ? (u.studentId || '-') : (u.role === 'teacher' ? (u.teacherId || '-') : '-');
+        const majorOrTitle = u.role === 'student' ? (u.major || '-') : (u.role === 'teacher' ? (u.title || '-') : '-');
+        return `<tr>
+          <td>${Utils.escape(u.id)}</td>
+          <td>${Utils.escape(u.username)}</td>
+          <td>${Utils.escape(u.realName)}</td>
+          <td>${UI.badge(u.role)}</td>
+          <td>${Utils.escape(idOrNum)}</td>
+          <td>${Utils.escape(majorOrTitle)}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="Admin.editUserModal(${u.id})">编辑</button>
+            ${u.username === 'admin' ? '<span class="text-muted" style="font-size:12px;">内置账号</span>'
+              : `<button class="btn btn-sm btn-danger" onclick="Admin.deleteUserModal(${u.id})">删除</button>`}
+          </td>
+        </tr>`;
+      }).join('');
+      area.innerHTML = `
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>ID</th><th>用户名</th><th>真实姓名</th><th>角色</th><th>学号/工号</th><th>专业/职称</th><th>操作</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(7, '暂无用户')}</tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  userFormHtml(u) {
+    u = u || {};
+    const isEdit = !!u.id;
+    return `
+      <div class="form-row">
+        <div class="form-group"><label>用户名 ${isEdit ? '（不可修改）' : '*'}</label>
+          <input type="text" id="f_username" value="${Utils.escape(u.username)}" ${isEdit ? 'disabled' : ''}></div>
+        <div class="form-group"><label>密码 ${isEdit ? '（留空表示不修改）' : '*'}</label>
+          <input type="text" id="f_password" value=""></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>真实姓名 *</label><input type="text" id="f_realname" value="${Utils.escape(u.realName)}"></div>
+        <div class="form-group"><label>角色</label>
+          <select id="f_role" onchange="Admin.toggleUserFields()">
+            <option value="student" ${u.role === 'student' ? 'selected' : ''}>学生</option>
+            <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>教师</option>
+            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>管理员</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" id="studentFields">
+        <div class="form-group"><label>学号</label><input type="text" id="f_student_id" value="${Utils.escape(u.studentId)}"></div>
+        <div class="form-group"><label>专业</label><input type="text" id="f_major" value="${Utils.escape(u.major)}"></div>
+      </div>
+      <div class="form-row" id="teacherFields">
+        <div class="form-group"><label>工号</label><input type="text" id="f_teacher_id" value="${Utils.escape(u.teacherId)}"></div>
+        <div class="form-group"><label>职称</label><input type="text" id="f_title" value="${Utils.escape(u.title)}"></div>
+      </div>
+      <p class="hint-text">接口：${isEdit ? 'PUT /api/admin/users/' + u.id : 'POST /api/admin/users'}（字段：username / password / realName / role / studentId / teacherId / major / title）</p>`;
+  },
+
+  addUserModal() {
+    UI.modal('添加用户', this.userFormHtml(null),
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-primary" onclick="Admin.saveUser(null)">保存</button>`);
+    this.toggleUserFields();
+  },
+
+  editUserModal(id) {
+    const u = (this.users || []).find(x => Number(x.id) === Number(id));
+    if (!u) { UI.toast('未找到该用户', 'error'); return; }
+    UI.modal('编辑用户 - ' + (u.realName || u.username), this.userFormHtml(u),
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-primary" onclick="Admin.saveUser(${u.id}, '${Utils.js(u.username)}')">保存</button>`);
+    this.toggleUserFields();
+  },
+
+  toggleUserFields() {
+    const role = document.getElementById('f_role').value;
+    document.getElementById('studentFields').style.display = role === 'student' ? '' : 'none';
+    document.getElementById('teacherFields').style.display = role === 'teacher' ? '' : 'none';
+  },
+
+  async saveUser(id, usernameFixed) {
+    const usernameEl = document.getElementById('f_username');
+    const password = document.getElementById('f_password').value.trim();
+    const realName = document.getElementById('f_realname').value.trim();
+    const role = document.getElementById('f_role').value;
+    const studentId = document.getElementById('f_student_id').value.trim() || null;
+    const teacherId = document.getElementById('f_teacher_id').value.trim() || null;
+    const major = document.getElementById('f_major').value.trim() || null;
+    const title = document.getElementById('f_title').value.trim() || null;
+
+    const username = id === null ? (usernameEl.value.trim() || '') : (usernameFixed || usernameEl.value.trim());
+    if (id === null && !username) { UI.toast('请输入用户名', 'error'); return; }
+    if (id === null && !password) { UI.toast('请输入密码', 'error'); return; }
+    if (!realName) { UI.toast('请输入真实姓名', 'error'); return; }
+
+    // 学生/教师各自保留自己的编号，另一种置空（与 API 契约字段一致）
+    const body = {
+      username,
+      password: password || '',
+      realName,
+      role,
+      studentId: role === 'student' ? studentId : null,
+      teacherId: role === 'teacher' ? teacherId : null,
+      major: role === 'student' ? major : null,
+      title: role === 'teacher' ? title : null
+    };
+    try {
+      if (id === null) await API.post('/admin/users', body);
+      else await API.put(`/admin/users/${id}`, body);
+      UI.toast(id === null ? '用户添加成功' : '用户更新成功', 'success');
+      UI.closeModal();
+      this.loadUsers();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  deleteUserModal(id) {
+    const u = (this.users || []).find(x => Number(x.id) === Number(id));
+    if (!u) return;
+    UI.modal('确认删除',
+      `<p style="font-size:15px;line-height:1.6;">确定要删除用户 <b>${Utils.escape(u.realName)}</b>（${Utils.escape(u.username)}）吗？</p>
+       <p class="hint-text">接口：DELETE /api/admin/users/${id}</p>`,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-danger" onclick="Admin.doDeleteUser(${id})">确认删除</button>`);
+  },
+
+  async doDeleteUser(id) {
+    try {
+      await API.del(`/admin/users/${id}`);
+      UI.toast('用户已删除', 'success');
+      UI.closeModal();
+      this.users = null;
+      this.loadUsers();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  /* ---------- 课程增删改查：/api/admin/courses ---------- */
+  async renderCourses() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>课程管理</h2>
+        <div class="toolbar">
+          <span class="hint-text">数据来源：GET /api/admin/courses</span>
+          <button class="btn btn-primary" onclick="Admin.addCourseModal()">+ 添加课程</button>
+          <button class="btn btn-default" onclick="Admin.loadCourses()">刷新</button>
+        </div>
+      </div>
+      <div id="coursesArea"></div>`;
+    await this.loadCourses();
+  },
+
+  async loadCourses() {
+    const area = document.getElementById('coursesArea');
+    if (!area) return;
+    area.innerHTML = Loading.html;
+    try {
+      const list = await API.get('/admin/courses') || [];
+      this.courses = list;
+      const rows = list.map(co => `
+        <tr>
+          <td>${Utils.escape(co.courseId)}</td>
+          <td>${Utils.escape(co.name)}</td>
+          <td>${Utils.escape(co.credit)}</td>
+          <td>${Utils.escape(co.teacherId || '-')} ${Utils.escape(co.teacherName || '')}</td>
+          <td>${Utils.num(co.selectedCount)}/${Utils.num(co.capacity)}</td>
+          <td>${Utils.escape(Utils.truncate(co.description, 30) || '-')}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="Admin.editCourseModal('${Utils.js(co.courseId)}')">编辑</button>
+            <button class="btn btn-sm btn-danger" onclick="Admin.deleteCourseModal('${Utils.js(co.courseId)}')">删除</button>
+          </td>
+        </tr>`).join('');
+      area.innerHTML = `
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>课程号</th><th>课程名</th><th>学分</th><th>授课教师</th><th>已选/容量</th><th>课程介绍</th><th>操作</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(7, '暂无课程')}</tbody>
+          </table>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  // 教师下拉选项来自 GET /api/admin/users
+  async teacherOptionsHtml(selectedId) {
+    const users = await API.get('/admin/users') || [];
+    const teachers = users.filter(u => u.role === 'teacher');
+    if (!teachers.length) return '<option value="">（暂无教师账号）</option>';
+    return teachers.map(t =>
+      `<option value="${Utils.js(t.teacherId || '')}" ${String(t.teacherId) === String(selectedId) ? 'selected' : ''}>${Utils.escape(t.teacherId || '-')} - ${Utils.escape(t.realName)}</option>`
+    ).join('');
+  },
+
+  courseFormHtml(co, teacherOptions) {
+    co = co || {};
+    const isEdit = !!co.courseId && co._edit;
+    return `
+      <div class="form-row">
+        <div class="form-group"><label>课程号 ${isEdit ? '（不可修改）' : '*'}</label>
+          <input type="text" id="f_course_id" value="${Utils.escape(co.courseId)}" ${isEdit ? 'disabled' : ''}></div>
+        <div class="form-group"><label>课程名 *</label><input type="text" id="f_name" value="${Utils.escape(co.name)}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>学分</label><input type="number" id="f_credit" min="1" max="10" value="${co.credit === undefined ? 3 : Utils.escape(co.credit)}"></div>
+        <div class="form-group"><label>容量</label><input type="number" id="f_capacity" min="1" value="${co.capacity === undefined ? 50 : Utils.escape(co.capacity)}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>授课教师</label><select id="f_teacher_id">${teacherOptions}</select></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label>课程介绍</label><textarea id="f_description">${Utils.escape(co.description)}</textarea></div>
+      </div>
+      <p class="hint-text">接口：${isEdit ? 'PUT /api/admin/courses/' + Utils.escape(co.courseId) : 'POST /api/admin/courses'}（字段：courseId / name / credit / description / teacherId / capacity）</p>`;
+  },
+
+  async addCourseModal() {
+    UI.modal('添加课程', Loading.html,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-primary" onclick="Admin.saveCourse(null)">保存</button>`);
+    try {
+      const options = await this.teacherOptionsHtml(null);
+      UI.setModalBody(this.courseFormHtml({}, options));
+    } catch (e) {
+      UI.setModalBody(Loading.error('教师列表加载失败：' + e.message));
+    }
+  },
+
+  async editCourseModal(courseId) {
+    const co = (this.courses || []).find(x => x.courseId === courseId);
+    if (!co) { UI.toast('未找到该课程', 'error'); return; }
+    const target = Object.assign({}, co, { _edit: true });
+    UI.modal('编辑课程 - ' + (co.name || courseId), Loading.html,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-primary" onclick="Admin.saveCourse('${Utils.js(courseId)}')">保存</button>`);
+    try {
+      const options = await this.teacherOptionsHtml(co.teacherId);
+      UI.setModalBody(this.courseFormHtml(target, options));
+    } catch (e) {
+      UI.setModalBody(Loading.error('教师列表加载失败：' + e.message));
+    }
+  },
+
+  async saveCourse(courseId) {
+    const isEdit = courseId !== null && courseId !== undefined && courseId !== '';
+    const idEl = document.getElementById('f_course_id');
+    const newId = isEdit ? courseId : (idEl ? idEl.value.trim() : '');
+    const name = document.getElementById('f_name').value.trim();
+    const credit = Number(document.getElementById('f_credit').value);
+    const capacity = Number(document.getElementById('f_capacity').value);
+    const teacherId = document.getElementById('f_teacher_id').value || null;
+    const description = document.getElementById('f_description').value.trim();
+
+    if (!newId) { UI.toast('请输入课程号', 'error'); return; }
+    if (!name) { UI.toast('请输入课程名', 'error'); return; }
+    if (!credit || credit < 1) { UI.toast('请输入正确的学分', 'error'); return; }
+    if (!capacity || capacity < 1) { UI.toast('请输入正确的容量', 'error'); return; }
+
+    const body = { courseId: newId, name, credit, description, teacherId, capacity };
+    try {
+      if (isEdit) await API.put(`/admin/courses/${encodeURIComponent(newId)}`, body);
+      else await API.post('/admin/courses', body);
+      UI.toast(isEdit ? '课程更新成功' : '课程添加成功', 'success');
+      UI.closeModal();
+      this.loadCourses();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  deleteCourseModal(courseId) {
+    const co = (this.courses || []).find(x => x.courseId === courseId);
+    UI.modal('确认删除',
+      `<p style="font-size:15px;line-height:1.6;">确定要删除课程 <b>${Utils.escape(co ? co.name : courseId)}</b>（${Utils.escape(courseId)}）吗？</p>
+       <p class="hint-text">接口：DELETE /api/admin/courses/${Utils.escape(courseId)}</p>`,
+      `<button class="btn btn-default" onclick="UI.closeModal()">取消</button>
+       <button class="btn btn-danger" onclick="Admin.doDeleteCourse('${Utils.js(courseId)}')">确认删除</button>`);
+  },
+
+  async doDeleteCourse(courseId) {
+    try {
+      await API.del(`/admin/courses/${encodeURIComponent(courseId)}`);
+      UI.toast('课程已删除', 'success');
+      UI.closeModal();
+      this.courses = null;
+      this.loadCourses();
+    } catch (e) {
+      UI.toast(e.message, 'error');
+    }
+  }
+};
+
+/* =====================================================================
+ * AI 学习助手面板（本次项目亮点）
+ *   - POST /api/agent/chat  { sessionId, message }
+ *   - 每条回复下方可展开 toolCalls（工具名 / 参数 / elapsedMs / 结果摘要）
+ *   - 显示 usage 与 mode（llm / fallback）
+ *   - 附带工具清单 GET /api/agent/tools 与评测 GET /api/agent/eval
+ * ===================================================================== */
+const Agent = {
+  sessionId: null,
+  messages: [],     // 仅当前会话消息（不落任何本地存储）
+  busy: false,
+  examples: [
+    '我还有几门作业没交？',
+    '我这门课成绩怎么样？',
+    '这门课的知识点有哪些？',
+    '帮我分析一下班级的作业完成情况'
+  ],
+
+  uid() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+    return 'sid-' + Date.now().toString(16) + '-' + Math.random().toString(16).slice(2, 10);
+  },
+
+  async render() {
+    if (!this.sessionId) this.sessionId = this.uid();
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>🤖 AI 学习助手</h2>
+        <div class="toolbar">
+          <span class="session-chip" title="前端生成的会话 ID，多轮对话保持一致">sessionId: ${Utils.escape(this.sessionId)}</span>
+          <button class="btn btn-sm btn-default" onclick="Agent.showTools()">查看工具清单</button>
+          <button class="btn btn-sm btn-default" onclick="Agent.runEval()">运行评测集</button>
+          <button class="btn btn-sm btn-default" onclick="Agent.newSession()">新建会话</button>
+        </div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="quick-questions" id="quickQuestions"></div>
+        <div class="chat-input">
+          <textarea id="chatInput" rows="2" placeholder="输入你的问题，例如：我还有几门作业没交？（Enter 发送 / Shift+Enter 换行）" onkeydown="Agent.onKey(event)"></textarea>
+          <button class="btn btn-primary" id="chatSendBtn" onclick="Agent.send()">发送</button>
+        </div>
+      </div>`;
+    this.renderQuick();
+    if (!this.messages.length) {
+      this.messages.push({
+        role: 'assistant',
+        reply: '你好，我是教务平台的 AI 学习助手。我会调用后端真实工具（作业/成绩/知识点/班级统计等）来回答你的问题。\n点击下方示例问题即可体验；每条回复下方可以展开查看本次真实调用的工具与耗时。',
+        toolCalls: []
+      });
+    }
+    this.renderMessages();
+  },
+
+  renderQuick() {
+    const el = document.getElementById('quickQuestions');
+    if (!el) return;
+    el.innerHTML = '<span class="hint-text" style="align-self:center;">示例问题：</span>' +
+      this.examples.map(q => `<button class="quick-q" onclick="Agent.ask('${Utils.js(q)}')">${Utils.escape(q)}</button>`).join('');
+  },
+
+  onKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      this.send();
+    }
+  },
+
+  ask(q) {
+    const input = document.getElementById('chatInput');
+    if (input) input.value = q;
+    this.send();
+  },
+
+  newSession() {
+    this.sessionId = this.uid();
+    this.messages = [];
+    this.render();
+    UI.toast('已新建会话，sessionId 已重置', 'info');
+  },
+
+  async send() {
+    if (this.busy) return;
+    const input = document.getElementById('chatInput');
+    const text = (input ? input.value : '').trim();
+    if (!text) { UI.toast('请输入问题', 'error'); return; }
+
+    this.busy = true;
+    if (input) input.value = '';
+    const btn = document.getElementById('chatSendBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '思考中…'; }
+
+    this.messages.push({ role: 'user', reply: text });
+    const pending = { role: 'assistant', pending: true, reply: '' };
+    this.messages.push(pending);
+    this.renderMessages();
+
+    try {
+      const res = await API.post('/agent/chat', { sessionId: this.sessionId, message: text });
+      pending.pending = false;
+      pending.reply = res.reply || '（后端未返回 reply）';
+      pending.toolCalls = res.toolCalls || [];
+      pending.usage = res.usage || null;
+      pending.mode = res.mode || null;
+    } catch (e) {
+      pending.pending = false;
+      pending.reply = '调用失败：' + e.message;
+      pending.toolCalls = [];
+      pending.error = true;
+      UI.toast(e.message, 'error');
+    } finally {
+      this.busy = false;
+      if (btn) { btn.disabled = false; btn.textContent = '发送'; }
+      this.renderMessages();
+    }
+  },
+
+  toolCallsHtml(toolCalls) {
+    if (!toolCalls || !toolCalls.length) {
+      return '<details class="tool-calls"><summary>🔧 本次未调用工具（点击展开说明）</summary>' +
+        '<div class="tool-calls-hint hint-text" style="padding:6px 2px;">后端本次直接回答，没有产生工具调用记录。</div></details>';
+    }
+    const items = toolCalls.map((t, i) => {
+      const ok = t.ok === true || t.ok === undefined;
+      const args = (t.arguments === undefined || t.arguments === null) ? {} : t.arguments;
+      let argsText;
+      try { argsText = JSON.stringify(args); } catch (e) { argsText = String(args); }
+      return `
+        <div class="tool-call">
+          <div class="tc-head">
+            <span class="tool-name">${i + 1}. ${Utils.escape(t.name)}</span>
+            <span class="badge ${ok ? 'badge-success' : 'badge-danger'}">${ok ? '执行成功' : '执行失败'}</span>
+            <span class="tc-meta">耗时 ${Utils.num(t.elapsedMs)} ms</span>
+          </div>
+          <div class="tc-args">参数：${Utils.escape(argsText)}</div>
+          <div class="tc-result">结果摘要：${Utils.escape(Utils.truncate(t.result, 500) || '(空)')}</div>
+        </div>`;
+    }).join('');
+    return `<details class="tool-calls" open>
+      <summary>🔧 本次调用了 ${toolCalls.length} 个后端工具（点击收起/展开查看证据）</summary>
+      ${items}
+    </details>`;
+  },
+
+  usageHtml(usage, mode) {
+    if (!usage && !mode) return '';
+    const modeClass = mode === 'llm' ? 'mode-llm' : (mode === 'fallback' ? 'mode-fallback' : 'mode-unknown');
+    const u = usage || {};
+    return `<div class="usage-bar">
+      <span class="mode-chip ${modeClass}">mode: ${Utils.escape(mode || '未知')}${mode === 'fallback' ? '（无 API Key，规则兜底）' : ''}</span>
+      <span>llmCalls: ${Utils.num(u.llmCalls)}</span>
+      <span>promptTokens: ${Utils.num(u.promptTokens)}</span>
+      <span>completionTokens: ${Utils.num(u.completionTokens)}</span>
+      <span>elapsedMs: ${Utils.num(u.elapsedMs)}</span>
+    </div>`;
+  },
+
+  renderMessages() {
+    const box = document.getElementById('chatMessages');
+    if (!box) return;
+    box.innerHTML = this.messages.map(m => {
+      if (m.role === 'user') {
+        return `<div class="msg user"><div class="bubble"><div class="msg-text">${Utils.escape(m.reply)}</div></div></div>`;
+      }
+      if (m.pending) {
+        return `<div class="msg assistant"><div class="bubble"><span class="spinner"></span>助手正在调用后端工具…</div></div>`;
+      }
+      const body = `${Utils.escape(m.reply)}`;
+      const tools = m.error ? '' : this.toolCallsHtml(m.toolCalls);
+      return `<div class="msg assistant"><div class="bubble">
+        <div class="msg-text">${body}</div>
+        ${tools}
+        ${this.usageHtml(m.usage, m.mode)}
+      </div></div>`;
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  },
+
+  /* ---------- 工具清单：GET /api/agent/tools ---------- */
+  async showTools() {
+    UI.modal('Agent 工具清单', Loading.html, UI.closeFooter(), true);
+    try {
+      const tools = await API.get('/agent/tools') || [];
+      const rows = tools.map(t => `
+        <tr>
+          <td><span class="tool-name">${Utils.escape(t.name)}</span></td>
+          <td>${Utils.escape(t.description)}</td>
+          <td>${UI.badge(t.role)}</td>
+          <td>${t.readOnly ? '<span class="badge badge-success">只读</span>' : '<span class="badge badge-warning">可写</span>'}</td>
+          <td><span class="tc-args" style="margin:0;display:inline-block;">${Utils.escape(JSON.stringify(t.parameters || {}))}</span></td>
+        </tr>`).join('');
+      UI.setModalBody(`
+        <p class="hint-text mb-16">接口：GET /api/agent/tools，共 ${tools.length} 个工具</p>
+        <div class="table-wrapper scrollable">
+          <table class="sub-table">
+            <thead><tr><th>工具名</th><th>说明</th><th>适用角色</th><th>是否只读</th><th>参数定义</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(5, '暂无工具')}</tbody>
+          </table>
+        </div>`);
+    } catch (e) {
+      UI.setModalBody(Loading.error(e.message));
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  /* ---------- 评测集：GET /api/agent/eval ---------- */
+  async runEval() {
+    UI.modal('Agent 工具调用评测', Loading.html, UI.closeFooter(), true);
+    try {
+      const r = await API.get('/agent/eval');
+      const acc = r.accuracy === null || r.accuracy === undefined ? '-' : (Utils.num(r.accuracy) * 100).toFixed(1) + '%';
+      const rows = (r.cases || []).map(c => `
+        <tr>
+          <td>${Utils.escape(c.question)}</td>
+          <td><span class="tool-name">${Utils.escape(c.expectedTool)}</span></td>
+          <td><span class="tool-name">${Utils.escape(c.actualTool)}</span></td>
+          <td>${c.passed ? '<span class="badge badge-success">通过</span>' : '<span class="badge badge-danger">未通过</span>'}</td>
+          <td>${Utils.num(c.elapsedMs)} ms</td>
+        </tr>`).join('');
+      UI.setModalBody(`
+        <div class="stats-grid">
+          ${UI.statCard(Utils.num(r.total), '评测用例数')}
+          ${UI.statCard(Utils.num(r.passed), '通过数')}
+          ${UI.statCard(acc, '工具调用准确率')}
+        </div>
+        <div class="table-wrapper scrollable">
+          <table class="sub-table">
+            <thead><tr><th>问题</th><th>期望工具</th><th>实际工具</th><th>结果</th><th>耗时</th></tr></thead>
+            <tbody>${rows || UI.emptyRow(5, '暂无评测数据')}</tbody>
+          </table>
+        </div>`);
+    } catch (e) {
+      UI.setModalBody(Loading.error(e.message));
+      UI.toast(e.message, 'error');
+    }
+  }
+};
+
+/* =====================================================================
+ * 性能基准面板（第二个亮点）
+ *   - GET /api/benchmark/stats?courseId=xxx
+ *   - GET /api/benchmark/select?courseId=xxx&threads=50
+ * ===================================================================== */
+const Bench = {
+  threads: 50,
+
+  async render() {
+    const c = document.getElementById('mainContent');
+    c.innerHTML = `
+      <div class="section-header">
+        <h2>📊 性能基准</h2>
+        <div class="toolbar">
+          <select id="benchCourse"></select>
+          <select id="benchThreads">
+            ${[10, 20, 50, 100, 200].map(t => `<option value="${t}" ${t === this.threads ? 'selected' : ''}>并发 ${t} 线程</option>`).join('')}
+          </select>
+          <button class="btn btn-primary" onclick="Bench.runStats()">运行查询对比</button>
+          <button class="btn btn-warning" onclick="Bench.runSelect()">运行并发选课压测</button>
+        </div>
+      </div>
+      <div id="benchStatsArea"></div>
+      <div id="benchSelectArea" class="mt-16"></div>`;
+    const sel = document.getElementById('benchCourse');
+    const tsel = document.getElementById('benchThreads');
+    tsel.onchange = () => { this.threads = Number(tsel.value); };
+    sel.innerHTML = '<option value="">加载课程中…</option>';
+    try {
+      const courses = await Helper.courses();
+      if (!courses.length) {
+        sel.innerHTML = '<option value="">暂无课程</option>';
+        document.getElementById('benchStatsArea').innerHTML = '<div class="table-empty">当前账号没有可用课程，无法运行基准测试</div>';
+        return;
+      }
+      sel.innerHTML = Helper.courseSelectHtml(courses, null);
+      sel.onchange = () => this.runStats();
+      await this.runStats();
+    } catch (e) {
+      sel.innerHTML = '<option value="">加载失败</option>';
+      document.getElementById('benchStatsArea').innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  courseId() {
+    const sel = document.getElementById('benchCourse');
+    return sel ? sel.value : '';
+  },
+
+  /* ---------- 查询次数对比 ---------- */
+  async runStats() {
+    const area = document.getElementById('benchStatsArea');
+    const courseId = this.courseId();
+    if (!courseId) { area.innerHTML = '<div class="table-empty">请先选择课程</div>'; return; }
+    area.innerHTML = Loading.html;
+    try {
+      const r = await API.get(`/benchmark/stats?courseId=${encodeURIComponent(courseId)}`);
+      const naive = r.naive || {};
+      const opt = r.optimized || {};
+      const savedQueries = Utils.num(naive.queryCount) - Utils.num(opt.queryCount);
+      const savedMs = Utils.num(naive.elapsedMs) - Utils.num(opt.elapsedMs);
+      area.innerHTML = `
+        <div class="bench-grid">
+          <div class="bench-card naive">
+            <h3>🐌 传统 N+1 实现（横向对比用）</h3>
+            <div class="metric"><span>SQL 查询次数</span><span class="val">${Utils.num(naive.queryCount)} 次</span></div>
+            <div class="metric"><span>总耗时</span><span class="val">${Utils.num(naive.elapsedMs)} ms</span></div>
+            <div class="bench-note">每名学生/每份作业单独查询，查询次数随数据量线性增长。</div>
+          </div>
+          <div class="bench-card optimized">
+            <h3>🚀 优化实现（批量查询，本次统计接口实际使用）</h3>
+            <div class="metric"><span>SQL 查询次数</span><span class="val">${Utils.num(opt.queryCount)} 次</span></div>
+            <div class="metric"><span>总耗时</span><span class="val">${Utils.num(opt.elapsedMs)} ms</span></div>
+            <div class="bench-note">一次性批量聚合，查询次数与数据量解耦（可通过「学情统计」面板的 queryCount 交叉验证）。</div>
+          </div>
+          <div class="bench-card">
+            <h3>📈 优化收益</h3>
+            <div class="big-num" style="color:#27ae60;">${Utils.escape(r.speedup === null || r.speedup === undefined ? '-' : (Math.round(Utils.num(r.speedup) * 10) / 10) + '×')}</div>
+            <div class="big-sub">速度提升倍数</div>
+            <div class="metric" style="margin-top:12px;"><span>减少查询次数</span><span class="val">${savedQueries} 次</span></div>
+            <div class="metric"><span>减少耗时</span><span class="val">${savedMs} ms</span></div>
+          </div>
+        </div>
+        <p class="bench-note">接口：GET /api/benchmark/stats?courseId=${Utils.escape(courseId)}（courseId=${Utils.escape(r.courseId || courseId)}）</p>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  },
+
+  /* ---------- 并发选课压测（会真实写入选课记录） ---------- */
+  async runSelect() {
+    const area = document.getElementById('benchSelectArea');
+    const courseId = this.courseId();
+    if (!courseId) { area.innerHTML = '<div class="table-empty">请先选择课程</div>'; return; }
+    const threads = this.threads;
+    area.innerHTML = Loading.html;
+    try {
+      const r = await API.get(`/benchmark/select?courseId=${encodeURIComponent(courseId)}&threads=${threads}`);
+      const oversold = Utils.num(r.oversold);
+      const success = Utils.num(r.success);
+      const rejected = Utils.num(r.rejected);
+      area.innerHTML = `
+        <div class="bench-grid">
+          <div class="bench-card select">
+            <h3>⚡ 并发选课压测结果（课程 ${Utils.escape(r.courseId || courseId)}）</h3>
+            <div class="metric"><span>课程容量 capacity</span><span class="val">${Utils.num(r.capacity)}</span></div>
+            <div class="metric"><span>并发线程数 threads</span><span class="val">${Utils.num(r.threads)}</span></div>
+            <div class="metric"><span>选课成功 success</span><span class="val" style="color:#27ae60;">${success}</span></div>
+            <div class="metric"><span>被拒绝（满员）rejected</span><span class="val" style="color:#f39c12;">${rejected}</span></div>
+            <div class="metric"><span>超卖 oversold</span><span class="val" style="color:${oversold === 0 ? '#27ae60' : '#e74c3c'};">${oversold}</span></div>
+            <div class="metric"><span>最终选课人数 finalSelected</span><span class="val">${Utils.num(r.finalSelected)}</span></div>
+            <div class="metric"><span>总耗时 elapsedMs</span><span class="val">${Utils.num(r.elapsedMs)} ms</span></div>
+          </div>
+          <div class="bench-card">
+            <h3>🧪 结论</h3>
+            <div class="big-num" style="color:${oversold === 0 ? '#27ae60' : '#e74c3c'};">${oversold === 0 ? '0 超卖' : oversold + ' 超卖'}</div>
+            <div class="big-sub">${oversold === 0 ? '乐观锁/条件更新生效，并发下不会超卖' : '存在超卖，需要检查并发控制'}</div>
+            <div class="metric" style="margin-top:12px;"><span>成功 + 拒绝</span><span class="val">${success + rejected} / ${Utils.num(r.threads)}</span></div>
+            <div class="metric"><span>失败率</span><span class="val">${Utils.percent(rejected, threads)}%</span></div>
+            <div class="bench-note">该接口会真实并发写入选课数据；若重复运行，结果可能因容量已满而变化。</div>
+          </div>
+        </div>
+        <p class="bench-note">接口：GET /api/benchmark/select?courseId=${Utils.escape(courseId)}&threads=${threads}</p>`;
+    } catch (e) {
+      area.innerHTML = Loading.error(e.message);
+      UI.toast(e.message, 'error');
+    }
+  }
+};
+
+/* ---------------------------------------------------------------
+ * 初始化
+ * --------------------------------------------------------------- */
+(function init() {
+  // 回车登录
+  ['loginUsername', 'loginPassword'].forEach(id => {
+    document.getElementById(id).addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') Auth.login();
+    });
+  });
+
+  // 点击遮罩关闭弹窗
+  document.getElementById('modalOverlay').addEventListener('click', function (e) {
+    if (e.target === this) UI.closeModal();
+  });
+
+  // 若 sessionStorage 里有 token，用 GET /api/me 恢复登录态
+  Auth.restore();
+})();
+</script>
+</body>
+</html>
