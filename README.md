@@ -5,7 +5,10 @@
 
 [![CI](https://github.com/fangping-zheng/EduPlatform/actions/workflows/ci.yml/badge.svg)](https://github.com/fangping-zheng/EduPlatform/actions/workflows/ci.yml)
 
-**在线演示**：`【部署后把链接填这里】` ｜ **演示账号见下方，免注册即可体验**
+**在线演示**：<https://edu-platform-f82p.onrender.com> ｜ **演示账号见下方，免注册即可体验**
+
+> ⚠️ 部署在 Render **免费实例**上：闲置约 15 分钟会自动休眠，**首次打开需要等 30–60 秒唤醒**，唤醒后所有功能正常。
+> 如果你要把它给面试官看，建议自己先点一次预热。
 
 ---
 
