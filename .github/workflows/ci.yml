@@ -1,0 +1,36 @@
+name: CI
+
+# 每次 push / PR 都自动编译并跑全部测试。
+# 简历上挂一个绿色的 CI 徽章，比写十句「熟悉单元测试」都有用。
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: 编译并运行测试
+        working-directory: backend
+        run: mvn -B --no-transfer-progress clean verify
+
+      - name: 上传测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: backend/target/surefire-reports/
+          if-no-files-found: ignore

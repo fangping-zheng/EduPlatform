@@ -1,0 +1,53 @@
+# 本地起一套「生产形态」环境：MySQL + 应用
+# 用法：docker compose up -d --build
+# 然后访问 http://localhost:8080
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: edu-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-edu_root_pwd}
+      MYSQL_DATABASE: ${DB_NAME:-edu_platform}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # 首次启动自动建表（脚本幂等，可重复执行）
+      - ./backend/src/main/resources/schema-mysql.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${DB_PASSWORD:-edu_root_pwd}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: ./backend
+    container_name: edu-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-edu_platform}
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:-edu_root_pwd}
+      # 大模型 Key：留空则 Agent 运行在 fallback 模式（仍会真实调用后端工具）
+      AGENT_API_KEY: ${AGENT_API_KEY:-}
+      AGENT_BASE_URL: ${AGENT_BASE_URL:-https://api.deepseek.com/v1}
+      AGENT_MODEL: ${AGENT_MODEL:-deepseek-chat}
+      # 生产务必改成随机长字符串
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-to-a-random-64-char-secret-in-production}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+
+volumes:
+  mysql-data:

@@ -1,0 +1,29 @@
+# 一键部署到 Render（免费额度可跑通，适合放简历链接）
+# 用法：把仓库推到 GitHub → Render 控制台 New → Blueprint → 选这个仓库
+#
+# 注意：Render 的免费实例会在闲置后休眠，首次访问需要等十几秒冷启动。
+# 如果需要 24 小时在线（面试官随时点），建议用国内轻量云服务器 + docker compose，见 docs/DEPLOY.md。
+services:
+  - type: web
+    name: edu-platform
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/agent/tools
+    envVars:
+      - key: SERVER_PORT
+        value: 8080
+      # 演示环境用 H2 文件库（重启后数据回到种子状态，正好适合做 Demo）
+      - key: SPRING_PROFILES_ACTIVE
+        value: default
+      # 生产务必改掉：在 Render 控制台里设置成随机长字符串
+      - key: JWT_SECRET
+        generateValue: true
+      # 大模型 Key：留空则 Agent 走 fallback 模式（仍会真实调用后端业务工具）
+      - key: AGENT_API_KEY
+        sync: false
+      - key: AGENT_BASE_URL
+        value: https://api.deepseek.com/v1
+      - key: AGENT_MODEL
+        value: deepseek-chat
